@@ -3,22 +3,23 @@
 
 /* CS50, pset1, greedy */
 
-int main(void)
+//int main(int argc, char *argv[])
+int main()
 {
     printf("O hai! ");
-    
+
     float fChg = -1.0;
-    int totalCoins = 0; 
-    float coins[4] = {25, 10, 5, 1 }; 
-    
+    int totalCoins = 0;
+    float coins[4] = {25, 10, 5, 1 };
+
     // Get the total. force positive vals
-    do 
+    do
     {
         printf("How much change is owed?\n");
         fChg = get_float();
     }
     while (fChg < 0);
-   
+
     int iChg = (fChg + .005) * 100;
     for (int x = 0; x < (sizeof(coins) / sizeof(int)); x++)
     {
@@ -32,8 +33,8 @@ int main(void)
             //printf("coins=%d\n", totalCoins);
         }
     }
-    
-    
+
+
     // final coins total
     printf("%i\n", totalCoins);
 }
