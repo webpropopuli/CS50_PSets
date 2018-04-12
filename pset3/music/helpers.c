@@ -28,7 +28,7 @@ int frequency(string note)
 	char Note = 0;
 	char Mod = 0;   // = 'modifier', i.e. sharp or flat
 
-    int nVal = 99;
+	   int nVal = 99;
 	// get tones
 	/* Break str into 2  or 3 parts
 	XYZ where X = A-G; Y = #/b (optional; Z = 0-8)
@@ -46,8 +46,8 @@ int frequency(string note)
 	}
 	else
 	{
-        return 0;
-        // add error handler
+	       return 0;
+	       // add error handler
 	}
 
 
@@ -76,7 +76,7 @@ int frequency(string note)
 	            nVal = 11;
 	            break;
 	       default:
-                // Bad note. Handle error
+	               // Bad note. Handle error
 	            return 0;
 
 	    }
@@ -106,25 +106,25 @@ int frequency(string note)
 	            }
 	        }
 	    else
-            {
-                // error invalid mod
-                return 0;
-            }
+	           {
+	               // error invalid mod
+	               return 0;
+	           }
 	    }
 
 /* convert for octave
-  Part of me wants to hardcode the freqs into an array,
-  which has to be faster than calculating each note, but
-  they seemed so proud of their "formula", I thought I'd
-  use it a lot and give out some Harvard-love, but really,
-  I wouldn't calc each note at run-time for under 100 possible vals.
+	 Part of me wants to hardcode the freqs into an array,
+	 which has to be faster than calculating each note, but
+	 they seemed so proud of their "formula", I thought I'd
+	 use it a lot and give out some Harvard-love, but really,
+	 I wouldn't calc each note at run-time for under 100 possible vals.
 
-  Then again, I type notes like this to myself so what do I know?
+	 Then again, I type notes like this to myself so what do I know?
 */
-    // -9 is offset from A back to C. This feels hideous but...
-    nVal = (Octave - 4) * 12 + nVal - 9;
+	   // -9 is offset from A back to C. This feels hideous but...
+	   nVal = (Octave - 4) * 12 + nVal - 9;
 
-    return round(pow(2, nVal / 12.000) * 440);
+	   return round(pow(2, nVal / 12.000) * 440);
 }
 
 
