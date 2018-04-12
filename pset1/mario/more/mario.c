@@ -1,3 +1,4 @@
+//like how you are using separate functions for printing spaces and blocks, learnt something new.
 #include <stdio.h>
 #include <cs50.h>
 
@@ -8,13 +9,13 @@ void printSpaces(int n)
         for(int x = 0; x < n; x++)
             printf(" ");
     }
-    
+
 void printBlocks(int n)
     {
         for(int x = 0; x < n; x++)
             printf("#");
     }
-    
+
 #define printGap() printSpaces(2)
 int main(void)
 {
