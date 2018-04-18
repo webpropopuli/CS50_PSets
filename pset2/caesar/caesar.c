@@ -21,10 +21,14 @@ char strCipher[512] = {0};;       // spec says nothing but I think malloc is pas
 	int keyval = atoi(argv[1]) % 26;
 	//logi(keyval)
 
+    /*PR COMMENT 1
+    * Minor stylistic suggestion here, why not have
+    * 'strPlain = get_string("Plaintext: ")' on a single
+    * line
+    */
     // Get plaintext from user
     printf("Plaintext:");
     strPlain = get_string();
-
 
     int chr;   //current char in plaintest
 

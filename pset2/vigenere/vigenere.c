@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	        }
 	}
 
-
+    //See PR COMMENT 1
     // Get plaintext from user
     printf("plaintext:");
     strPlain = get_string();
