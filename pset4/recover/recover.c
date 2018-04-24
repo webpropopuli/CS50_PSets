@@ -19,9 +19,9 @@ else
 
 int main(int argc, char *argv[])
 {
-int counter = 0;    // for naming output file
-unsigned char data[512] = {0};
-int ret = 0;        //return value
+int counter = 0;                    // for naming output file. Increments with each fOut open
+unsigned char data[512] = {0};      // Hold our image data here
+int ret = 0;                        //return value, 0 is happy time
 
 FILE *fRaw = fopen(argv[1], "r");
 char outfile[] = "000.jpg";
@@ -69,6 +69,7 @@ while(0 == ret)
     {
         sprintf(outfile, "%03d.jpg", counter);
         fOut = fopen(outfile, "w");
+        counter++ ;
 DJM printf("Opened %s\n", outfile);
         if (fOut == NULL)
         {
@@ -78,7 +79,7 @@ DJM printf("Opened %s\n", outfile);
             ret= 3;
             break;
         }
-        counter++ ;
+
     }
     fwrite(data, 1, 512, fOut);
 
@@ -86,7 +87,7 @@ DJM printf("Opened %s\n", outfile);
     int BlockSize = fread(data, 1, 512, fRaw);
     if (512 != BlockSize || IsHdr(data))
     {
-        fwrite(data, 1, BlockSize, fOut);
+        //fwrite(data, 1, BlockSize, fOut);
         fclose(fOut);
         fOut = NULL;
         if (512 != BlockSize)
