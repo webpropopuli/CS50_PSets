@@ -137,7 +137,7 @@ int main(int argc, string argv[])
     return 0;
 }
 
-/**
+/*
  * Clears screen using ANSI escape sequences.
  */
 void clear(void)
@@ -157,6 +157,16 @@ void greet(void)
     usleep(2000000);
 }
 
+
+
+
+
+/***
+I think you haven`t finish this one since one has to swap 1 and 2, aka check for board dimension/or for odd number of tiles.
+I wonder if working with pointers is something native and comfortable for you.
+For me, using "&" and "*" syntax is a bit extra work, so I ran this function without using pointers.
+-->cleaner to read and follow. But that's obvisously a matter of preference.
+*/
 /**
  * Initializes the game's board with tiles numbered 1 through d*d - 1
  * (i.e., fills 2D array with values but does not actually print them).

@@ -5,9 +5,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
 #include "helpers.h"
 
+
+/***
+Excellent code, David. Love how you are using sscanf() and pointers here.
+*/
 // Converts a fraction formatted as X/Y to eighths
 int duration(string fraction)
 {
@@ -20,6 +23,12 @@ int duration(string fraction)
 
     return top;
 }
+
+
+
+/***
+Nice use of switch here and pointers again!!!!
+*/
 
 // Calculates frequency (in Hz) of a note
 int frequency(string note)
@@ -129,6 +138,9 @@ int frequency(string note)
 
 
 
+/***
+One liner-- nice!!!
+*/
 // Determines whether a string represents a rest
 bool is_rest(string s)
 {
