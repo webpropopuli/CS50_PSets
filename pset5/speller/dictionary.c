@@ -33,7 +33,7 @@ typedef unsigned hkey;
 
 #define WAIT {puts("<any key>"); getchar();}
 
-#define HASHSIZE 143477 //105557   // size of hash table. This is a prime for mathy reasons beyond the 
+#define HASHSIZE 143477 //105557   // size of hash table. This is a prime for mathy reasons beyond the
                         // scope of this problem and my brain. 7919 is the 1000th prime fwiw.
 
 DICT dict;              // The Dictionary we build
@@ -230,9 +230,12 @@ char *tmp = malloc(strlen(word) + 1);
 // make a copy and lowercase it
 strcpy(tmp, word);
 p = tmp;
-for (; *p; ++p) 
-    *p = tolower(*p);
-    
+
+for (; *p; ++p)
+    {
+        *p = tolower(*p);
+    }
+
 key = GetHashKey(tmp);
 
 pHEAD = GetHeadPtr(key);
@@ -242,7 +245,7 @@ if(LookupNode(tmp, pHEAD) == NULL)     //Not found
     RC =  false;
 else
     RC = true;
-    
+
 free(tmp);
 return RC;
 }
@@ -291,7 +294,7 @@ char *strStart;
 do
 {
     strStart = pMem;    // save the begin of str in DICT
-    
+
     // find end of string so we can null term it
     while(*pMem > 0x0d) // input strings break at newlines
     {
@@ -362,7 +365,7 @@ return dict.size;
 static int FreeNode(NODE *p)
 {
     assert(p);
-    
+
     if(p->next)
         {
         if (p->next->next)
@@ -374,8 +377,8 @@ static int FreeNode(NODE *p)
             free(p->next);
             p->next = NULL;
             }
-        }    
-        
+        }
+
     else if(NULL != p)
         {
             free(p);    // if list only has 1 element
@@ -384,7 +387,7 @@ static int FreeNode(NODE *p)
     return 0;
 }
 */
-    
+
 /*****
  * *                    unload()
  * * */
@@ -400,7 +403,7 @@ NODE *p, *tmp;
         HEAD *pH = &HASH[x];
 
         p = pH->pNode;
-        
+
         while (NULL != p)
             {
                 tmp = p;
