@@ -24,7 +24,7 @@ unsigned char data[512] = {0};      // Hold our image data here
 int ret = 0;                        //return value, 0 is happy time
 
 FILE *fRaw = fopen(argv[1], "r");
-char outfile[] = "000.jpg";
+char outfile[] = "000.jpg"; // pre-size it here
 
     // ensure proper usage
 if (argc != 2)
@@ -79,7 +79,6 @@ DJM printf("Opened %s\n", outfile);
             ret= 3;
             break;
         }
-
     }
     fwrite(data, 1, 512, fOut);
 
