@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
             // read RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-            //remove blue and green
+            //remove blue and green. It's always Proessor Plum, isn't it?
             triple.rgbtBlue = triple.rgbtGreen = 0;
 
             // write RGB triple to outfile

@@ -26,7 +26,7 @@ int ret = 0;                        //return value, 0 is happy time
 FILE *fRaw = fopen(argv[1], "r");
 char outfile[] = "000.jpg"; // pre-size it here
 
-    // ensure proper usage
+// ensure proper usage
 if (argc != 2)
     {
         fprintf(stderr, "Usage: ./recover image\n");
@@ -63,16 +63,18 @@ do
 FILE *fOut = NULL;      //Write found files here. May create > 1 file
 
 // Now we're at first valid block
+// and data[] is full
 while(0 == ret)
 {
+    // if we're not currently writing a file, create it here
     if (NULL == fOut)
     {
         sprintf(outfile, "%03d.jpg", counter);
         fOut = fopen(outfile, "w");
         counter++ ;
-DJM printf("Opened %s\n", outfile);
+
         if (fOut == NULL)
-        {
+        {                   // error
             fclose(fRaw);
             fRaw = NULL;
             fprintf(stderr, "Could not create %s.\n", outfile);
@@ -84,7 +86,8 @@ DJM printf("Opened %s\n", outfile);
 
     //Get more
     int BlockSize = fread(data, 1, 512, fRaw);
-    if (512 != BlockSize || IsHdr(data))
+//    if (512 != BlockSize || IsHdr(data))
+    if (IsHdr(data))
     {
         //fwrite(data, 1, BlockSize, fOut);
         fclose(fOut);
@@ -92,7 +95,7 @@ DJM printf("Opened %s\n", outfile);
         if (512 != BlockSize)
             break;  // must be EOF
     }
-} // while
+} // end while
 
 
 if(NULL != fRaw)

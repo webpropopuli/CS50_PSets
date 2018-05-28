@@ -28,11 +28,11 @@ int frequency(string note)
 	char Note = 0;
 	char Mod = 0;   // = 'modifier', i.e. sharp or flat
 
-	   int nVal = 99;
+	int nVal = 99;  // some out of scope var I hope to never see
 	// get tones
 	/* Break str into 2  or 3 parts
-	XYZ where X = A-G; Y = #/b (optional; Z = 0-8)
-	For now, will compare strle=2 or 3. Not sure if I can have an optional
+	XYZ where X = A-G; Y = #/b (optional); Z = 0-8)
+	For now, will compare strlen=2 or 3. Not sure if I can have an optional
 	param in sscanf so this will do for now
 	*/
 	if (2 == strlen(note))

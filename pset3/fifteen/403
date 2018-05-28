@@ -1,0 +1,71 @@
+ls
+cd classathon17Apr/
+ls
+c9 strcontains.c
+make strcontains
+strContains "I ate an apple" an
+./strContains "I ate an apple" an
+./strcontains "I ate an apple" an
+make strcontains
+debug50 ./strcontains "I ate an apple" an
+make strcontains
+debug50 ./strcontains "I ate an apple" an
+make strcontains
+debug50 ./strcontains "I ate an apple" an
+make strcontains
+debug50 ./strcontains "I ate an apple" an
+make strcontains
+debug50 ./strcontains "I ate an apple" an
+debug50 ./strcontains "Iateanapple" an
+make strcontains
+debug50 ./strcontains "Iateanapple" an
+make strcontains
+./strcontains "Iateanapple" an
+./strcontains "Iatean apple" an
+./strcontains "I atean apple" an
+./strcontains "I ate an apple" an
+debug50 ./strcontains "I ate an apple" an
+gdb strcontains
+gdb ./strcontains "I ate an apple" an
+make strcontains
+debug50 ./strcontains "I ate an apple" an
+make strcontains
+./strcontains "I ate an apple" an
+make strcontains
+debug50 ./strcontains "I ate an apple" an
+make strcontains
+./strcontains "I ate an apple" an
+./strcontains "I ate an ant" an
+make strcontains
+./strcontains "I ate an ant" an
+make strcontains
+./strcontains "I ate an ant" an
+make strcontains
+./strcontains "I ate an ant" an
+make strcontains
+./strcontains "I ate an ant" an
+make strcontains
+./strcontains "I ate an ant" an
+./strcontains "I ate an arnt" an
+./strcontains "I ate an arnt" any
+make strcontains
+./strcontains "I ate an arnt" any
+./strcontains "I ate an arnt" an
+./strcontains "I ate an ant" an
+git add -A
+git commit -m "Added strContains"
+git push
+cd .git/
+cd ..
+cd CS50
+cd pset3
+ls
+cd fifteen
+ls
+cls
+clear
+c9 fifteen.c
+history --help
+history
+history 403
+history -a 403

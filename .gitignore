@@ -1,0 +1,7 @@
+*.jpg
+*.bmp
+*.raw
+pset5/speller/texts/*
+pset5/speller/keys/
+pset5/speller/dictionaries
+*.o
