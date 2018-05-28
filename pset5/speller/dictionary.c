@@ -44,18 +44,18 @@ HEAD HASH[HASHSIZE];    // The Hash Table we use. An array of singly linked list
 // some crappy hash fn found on interwebs. This is secondary though an optimal fn is sorta important
 unsigned int GetHashKey(const char* word)
 {
-register unsigned int hash = 131; //1315423911;
+register unsigned int hash = 13115; //1315423911;
 
 while (*word)
     {
-    hash ^= ((hash << 5) + (*word) + (hash >> 3));
-    word++;
+    hash ^= ((hash << 5) + (*word) + (hash >> 2));  // do some magic stuff
+    word++;                                         // for each letter
     }
 
 #if 0
     return (hash % HASHSIZE);
 #else
-    return (hash & HASHMASK);
+    return (hash & HASHMASK); // this should be faster though smart compiler prolly means irrelevant
 #endif
 }
 
@@ -87,19 +87,10 @@ NODE* CreateNode(char *str)
 bool check(const char *word)
 {
 register char* p;
-static NODE *np;
-static char temp[LENGTH];
+register NODE *np;
+static char temp[LENGTH];  // a reusable area to munge the input word to lower
 
 // make a copy and lowercase it
-/*
-register char *tmp;
-tmp = malloc(strlen(word) + 1);
-strcpy(tmp, word);
-p = tmp;
-for (; *p; ++p)
-    //if(*p>='A')
-        *p = tolower(*p);
-*/
 strcpy(temp, word);
 p = temp;
 for (; *p; ++p)
@@ -110,20 +101,19 @@ for (; *p; ++p)
 unsigned int key = GetHashKey(temp);
 //printf("%u|", key);
 
-if ((&HASH[key])->pNode != NULL)   // something in this list
+if ((&HASH[key])->pNode == NULL)
+    return false;  // nothing in this list
+
+np = (&HASH[key])->pNode;
+while(np != NULL)    // this list is not empty
     {
-    np = (&HASH[key])->pNode;
-    while(np != NULL)    // this list is not empty
+    if (0 == strcmp(temp, np->addr))
         {
-        if (0 == strcmp(temp, np->addr))
-            {
-            //free(tmp);
-            return true;    // found
-                        }
-        np = np->next;
+        return true;    // found
         }
+    np = np->next;
     }
-//free(tmp);
+
 return false;
 }
 
