@@ -31,27 +31,32 @@ typedef unsigned hkey;
                       __func__, __LINE__, __FILE__);
 
 #define WAIT {puts("<any key>"); getchar();}
-
-#define HASHSIZE 143477 // 143477, 105557   // size of hash table. This is a prime for mathy reasons beyond the
-                        // scope of this problem and my brain. 7919 is the 1000th prime fwiw.
+//2^16	65536
+//2^17	131072
+//2^18	262144
+#define HASHSIZE 262144 // 143477, 105557   // size of hash table. This is a prime for mathy reasons beyond the scope of this problem and my brain
+#define HASHMASK 262143                    // turn all bit on 1 less than HASHSIZE (which MUST BE A Power of 2)
 
 DICT dict;              // The Dictionary we build
 
 HEAD HASH[HASHSIZE];    // The Hash Table we use. An array of singly linked lists
 
 // some crappy hash fn found on interwebs. This is secondary though an optimal fn is sorta important
-hkey GetHashKey(const char* word)
+unsigned int GetHashKey(const char* word)
 {
-   unsigned int length = strlen(word);
-   unsigned int hash = 1315423911;
-   unsigned int i    = 0;
+register unsigned int hash = 131; //1315423911;
 
-  for (i = 0; i < length; ++word, ++i)
-  {
-     hash ^= ((hash << 5) + (*word) + (hash >> 2));
-  }
+while (*word)
+    {
+    hash ^= ((hash << 5) + (*word) + (hash >> 3));
+    word++;
+    }
 
-    return (hkey)(hash % HASHSIZE);
+#if 0
+    return (hash % HASHSIZE);
+#else
+    return (hash & HASHMASK);
+#endif
 }
 
 
@@ -73,23 +78,6 @@ NODE* CreateNode(char *str)
     return np;
 }
 
-/***                    LookupNode()
- *find a node
- * return NODE * if found, else NULL
- */
-/*
-NODE *LookupNode(char *s, NODE *np)
-{
-    while(np != NULL)
-        {
-        if (0 == strcmp(s, np->addr))
-          return np;    // found
-        np = np->next;
-        }
-    return NULL;        // not found
-}
-*/
-
 
 
 /*****
@@ -98,34 +86,45 @@ NODE *LookupNode(char *s, NODE *np)
 // Returns true if word found in dictionary else false
 bool check(const char *word)
 {
-bool RC = false;
-char* p;
+register char* p;
+static NODE *np;
+static char temp[LENGTH];
 
 // make a copy and lowercase it
-char *tmp = malloc(strlen(word) + 1);
+/*
+register char *tmp;
+tmp = malloc(strlen(word) + 1);
 strcpy(tmp, word);
 p = tmp;
 for (; *p; ++p)
-    if(*p>='A')
+    //if(*p>='A')
+        *p = tolower(*p);
+*/
+strcpy(temp, word);
+p = temp;
+for (; *p; ++p)
+    //if(*p>='A')
         *p = tolower(*p);
 
 
-NODE *np = (&HASH[GetHashKey(tmp)])->pNode;
-if(np != NULL)    // this list is not empty
+unsigned int key = GetHashKey(temp);
+//printf("%u|", key);
+
+if ((&HASH[key])->pNode != NULL)   // something in this list
     {
-    while(np != NULL)
+    np = (&HASH[key])->pNode;
+    while(np != NULL)    // this list is not empty
         {
-        if (0 == strcmp(tmp, np->addr))
+        if (0 == strcmp(temp, np->addr))
             {
-            RC = true;    // found
-            break;
-            }
+            //free(tmp);
+            return true;    // found
+                        }
         np = np->next;
         }
     }
-
-free(tmp);
-return RC;
+//free(tmp);
+return false;
 }
 
 /*****
@@ -168,10 +167,17 @@ fread(dict.buf, lFileLen, 1, fileDict); /* Read the entire file into DICT */
 
 char *pMem=dict.buf;    // ptr into to DICT text
 char *endMem = dict.buf + lFileLen;  // ptr to end of buffer
+HEAD * pHEAD;
 
 char *strStart;
 do
 {
+    if(!(*pMem))
+    {
+        pMem++;
+        continue;
+    }
+
     strStart = pMem;    // save the begin of str in DICT
 
     // find end of string so we can null term it
@@ -179,15 +185,16 @@ do
     {
          pMem++;
     }
-    *(pMem++) = 0;  // null terminate both
-
-    hkey key = GetHashKey(strStart);
-    HEAD *pHEAD = &HASH[key];
+    *(pMem) = 0;  // null terminate both
+    pMem++;
 
     /* Create it, insert it and update count
     */
-    if(strlen(strStart))
+    if(*strStart) // not NULL
         {
+        unsigned int key = GetHashKey(strStart);
+        pHEAD = &HASH[key];
+
         NODE *pNode = CreateNode(strStart);
 
         // INSERT node at HEAD position
@@ -202,24 +209,6 @@ fclose (fileDict);
 
 //LOG printf("load() read %i lines from %s\n", dict.size, dictionary);
 
-#if 0
-DJM // dump the hash table
-for(int z = 0; z<HASHSIZE; z++)
-{
-    NODE *p = HASH[z].pNode;
-
-    printf("\nHASH[%d] %d elements\n", z, HASH[z].cnt);
-
-    if(p != NULL)
-        do
-        {
-            printf("\t[%s]", p->addr);
-            p = p->next;
-        }
-        while (p != NULL);
-}
-DJM WAIT
-#endif
 
 return true;
 }
@@ -230,13 +219,6 @@ return true;
 // Returns number of words in dictionary if loaded else 0 if not yet loaded
 unsigned int size(void)
 {
-    /*
-    DJM // alt method
-    int size = 0;
-    for(int x = 0; x< HASHSIZE; x++)
-        size += HASH[x].cnt;
-    printf ("size() 1:%d, 2:%d\n", size, dict.size);
-    */
 return dict.size;
 }
 
