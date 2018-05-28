@@ -23,6 +23,7 @@ typedef struct _NODE {
 
 typedef struct _HEAD {  // Head pointers for hash array
     NODE *pNode;
+    int hasData;        // will be 0 until first use
 } HEAD;
 
 typedef unsigned hkey;
@@ -42,15 +43,13 @@ DICT dict;              // The Dictionary we build
 HEAD HASH[HASHSIZE];    // The Hash Table we use. An array of singly linked lists
 
 // some crappy hash fn found on interwebs. This is secondary though an optimal fn is sorta important
-unsigned int GetHashKey(const char* word)
+inline static unsigned int GetHashKey(const char* word)
 {
-register unsigned int hash = 13115; //1315423911;
+register unsigned long hash = 0;
+register int c;
 
-while (*word)
-    {
-    hash ^= ((hash << 5) + (*word) + (hash >> 2));  // do some magic stuff
-    word++;                                         // for each letter
-    }
+        while ((c = *word++))
+            hash = c + (hash << 6) + (hash << 16) - hash;
 
 #if 0
     return (hash % HASHSIZE);
@@ -94,23 +93,25 @@ static char temp[LENGTH];  // a reusable area to munge the input word to lower
 strcpy(temp, word);
 p = temp;
 for (; *p; ++p)
-    //if(*p>='A')
-        *p = tolower(*p);
+    //if(*p < 'a')
+        *p |= 32;   // this is a bitmask. Go look at the ascii table...
 
 
 unsigned int key = GetHashKey(temp);
 //printf("%u|", key);
 
-if ((&HASH[key])->pNode == NULL)
-    return false;  // nothing in this list
+if( 0 == (&HASH[key])->hasData)     // ...never assigned anything to this row
+    return false;
 
 np = (&HASH[key])->pNode;
-while(np != NULL)    // this list is not empty
+
+while(np /*!= NULL*/)    // this list is not empty
     {
-    if (0 == strcmp(temp, np->addr))
-        {
-        return true;    // found
-        }
+    if(temp[0] == *np->addr)        //hacking strcmp- don't call func it first chars don't match
+        if (0 == strcmp(temp, np->addr))
+            {
+            return true;    // found
+            }
     np = np->next;
     }
 
@@ -190,6 +191,7 @@ do
         // INSERT node at HEAD position
         pNode->next = pHEAD->pNode;     // new->next to current head
         pHEAD->pNode = pNode;           // then HEAD is the new guy
+        pHEAD->hasData++;
         dict.size++;
         }
 } while(pMem < endMem);   // while < endBuf
@@ -205,39 +207,15 @@ return true;
 
 /*****
  * *                    size()
- * * */
-// Returns number of words in dictionary if loaded else 0 if not yet loaded
-unsigned int size(void)
+ * *
+ * * Returns number of words in dictionary if loaded else 0 if not yet loaded
+ * */
+inline unsigned int size(void)
 {
 return dict.size;
 }
 
-/*
-static int FreeNode(NODE *p)
-{
-    assert(p);
 
-    if(p->next)
-        {
-        if (p->next->next)
-            {
-            return FreeNode(p->next);
-            }
-        else
-            {
-            free(p->next);
-            p->next = NULL;
-            }
-        }
-
-    else if(NULL != p)
-        {
-            free(p);    // if list only has 1 element
-            p = NULL;
-        }
-    return 0;
-}
-*/
 
 /*****
  * *                    unload()
@@ -250,20 +228,21 @@ NODE *p, *tmp;
     // Walk each list and unload from the end
     for(int x=0; x<HASHSIZE; x++)
     {
-//DJM printf("Freeing HASH[%d]\t", x);
+    if(HASH[x].hasData == 0)
+        continue;
+    else
+        {
         HEAD *pH = &HASH[x];
 
         p = pH->pNode;
 
         while (NULL != p)
             {
-                tmp = p;
-                p = p->next;
-                free(tmp);
+            tmp = p;
+            p = p->next;
+            free(tmp);
             }
-//        if(NULL != p->pNode)        // could possibly have a list with no entries
-//            FreeNode(p->pNode);         // This will recurse through each list
-//                                    // At least it works that way in my dreams....
+        }
     }
 
     free(dict.buf);
