@@ -22,7 +22,6 @@ typedef struct _NODE {
 } NODE;
 
 typedef struct _HEAD {  // Head pointers for hash array
-    int cnt;
     NODE *pNode;
 } HEAD;
 
@@ -33,133 +32,26 @@ typedef unsigned hkey;
 
 #define WAIT {puts("<any key>"); getchar();}
 
-#define HASHSIZE 143477 //105557   // size of hash table. This is a prime for mathy reasons beyond the 
+#define HASHSIZE 143477 // 143477, 105557   // size of hash table. This is a prime for mathy reasons beyond the
                         // scope of this problem and my brain. 7919 is the 1000th prime fwiw.
 
 DICT dict;              // The Dictionary we build
 
 HEAD HASH[HASHSIZE];    // The Hash Table we use. An array of singly linked lists
 
-
-/*****
- * *                    InitHashTable()
- * * */
-void InitHashtable(void)
+// some crappy hash fn found on interwebs. This is secondary though an optimal fn is sorta important
+hkey GetHashKey(const char* word)
 {
-    HEAD *p = &HASH[0];
+   unsigned int length = strlen(word);
+   unsigned int hash = 1315423911;
+   unsigned int i    = 0;
 
-    for(int x=0; x<HASHSIZE; x++)
-    {
-        p->pNode = NULL;
-        p->cnt = 0;
-    }
-}
-
-/* stolen from MurmurHash : https://github.com/aappleby/smhasher */
-hkey GetHashKey(const void *key)
-{
-  const unsigned int m = 0xc6a4a793;    // anything
-  const int r = 16;
-  int len = strlen((char *)key);
-  unsigned int seed = 0x43770;          // anything
-  const unsigned char * data = (const unsigned char *)key;
-
-  unsigned int h = seed ^ (len * m);
-
-  int align = (uint64_t)data & 3;
-
-  if(align && (len >= 4))
+  for (i = 0; i < length; ++word, ++i)
   {
-    // Pre-load the temp registers
-
-    unsigned int t = 0, d = 0;
-
-    switch(align)
-    {
-      case 1: t |= data[2] << 16;
-      case 2: t |= data[1] << 8;
-      case 3: t |= data[0];
-    }
-
-    t <<= (8 * align);
-
-    data += 4-align;
-    len -= 4-align;
-
-    int sl = 8 * (4-align);
-    int sr = 8 * align;
-
-    // Mix
-
-    while(len >= 4)
-    {
-      d = *(unsigned int *)data;
-      t = (t >> sr) | (d << sl);
-      h += t;
-      h *= m;
-      h ^= h >> r;
-      t = d;
-
-      data += 4;
-      len -= 4;
-    }
-
-    // Handle leftover data in temp registers
-
-    int pack = len < align ? len : align;
-
-    d = 0;
-
-    switch(pack)
-    {
-    case 3: d |= data[2] << 16;
-    case 2: d |= data[1] << 8;
-    case 1: d |= data[0];
-    case 0: h += (t >> sr) | (d << sl);
-        h *= m;
-        h ^= h >> r;
-    }
-
-    data += pack;
-    len -= pack;
-  }
-  else
-  {
-    while(len >= 4)
-    {
-      h += *(unsigned int *)data;
-      h *= m;
-      h ^= h >> r;
-
-      data += 4;
-      len -= 4;
-    }
+     hash ^= ((hash << 5) + (*word) + (hash >> 2));
   }
 
-  //----------
-  // Handle tail bytes
-
-  switch(len)
-  {
-  case 3: h += data[2] << 16;
-  case 2: h += data[1] << 8;
-  case 1: h += data[0];
-      h *= m;
-      h ^= h >> r;
-  };
-
-  h *= m;
-  h ^= h >> 10;
-  h *= m;
-  h ^= h >> 17;
-
-  return (hkey)(h % HASHSIZE);
-} // end of hash func
-
-
-static inline HEAD * GetHeadPtr(hkey key)
-{
-    return &HASH[key];
+    return (hkey)(hash % HASHSIZE);
 }
 
 
@@ -185,35 +77,20 @@ NODE* CreateNode(char *str)
  *find a node
  * return NODE * if found, else NULL
  */
-NODE *LookupNode(char *s, HEAD *pHEAD)
+/*
+NODE *LookupNode(char *s, NODE *np)
 {
-    if(pHEAD->pNode == NULL)    // this list is empty
-        return NULL;
-
-    NODE *np = pHEAD->pNode;
-
     while(np != NULL)
         {
         if (0 == strcmp(s, np->addr))
-          return np;    /* found */
+          return np;    // found
         np = np->next;
         }
-    return NULL;        /* not found */
+    return NULL;        // not found
 }
+*/
 
 
-/***                    InsertNode()
- * Insert node at head
- *  new->next = Head
- *  replace HEAD with new
- */
-bool InsertNode(NODE *pNode, HEAD *pHEAD)
-{
-    pNode->next = pHEAD->pNode;
-    pHEAD->pNode = pNode;
-    pHEAD->cnt++;
-    return true;
-}
 
 /*****
  * *                    check()
@@ -221,28 +98,32 @@ bool InsertNode(NODE *pNode, HEAD *pHEAD)
 // Returns true if word found in dictionary else false
 bool check(const char *word)
 {
-static bool RC;
-static char* p;
-static hkey key;
-static HEAD *pHEAD;
+bool RC = false;
+char* p;
 
-char *tmp = malloc(strlen(word) + 1);
 // make a copy and lowercase it
+char *tmp = malloc(strlen(word) + 1);
 strcpy(tmp, word);
 p = tmp;
-for (; *p; ++p) 
-    *p = tolower(*p);
-    
-key = GetHashKey(tmp);
+for (; *p; ++p)
+    if(*p>='A')
+        *p = tolower(*p);
 
-pHEAD = GetHeadPtr(key);
-//assert(pHEAD);
 
-if(LookupNode(tmp, pHEAD) == NULL)     //Not found
-    RC =  false;
-else
-    RC = true;
-    
+NODE *np = (&HASH[GetHashKey(tmp)])->pNode;
+if(np != NULL)    // this list is not empty
+    {
+    while(np != NULL)
+        {
+        if (0 == strcmp(tmp, np->addr))
+            {
+            RC = true;    // found
+            break;
+            }
+        np = np->next;
+        }
+    }
+
 free(tmp);
 return RC;
 }
@@ -254,7 +135,8 @@ return RC;
 bool load(const char *dictionary)
 {
 dict.size = 0;
-InitHashtable();
+
+memset(HASH, 0, HASHSIZE*sizeof(HEAD));  //InitHashtable();
 
 //LOG printf("->Opening dict %s\n", dictionary);
 
@@ -291,7 +173,7 @@ char *strStart;
 do
 {
     strStart = pMem;    // save the begin of str in DICT
-    
+
     // find end of string so we can null term it
     while(*pMem > 0x0d) // input strings break at newlines
     {
@@ -300,17 +182,18 @@ do
     *(pMem++) = 0;  // null terminate both
 
     hkey key = GetHashKey(strStart);
-    HEAD *pHEAD = GetHeadPtr(key);
+    HEAD *pHEAD = &HASH[key];
 
-    // if not in list then create it and update count
-//DJM printf("Found Dict word %s(keyval %d)\n", strStart, (int)key);
+    /* Create it, insert it and update count
+    */
     if(strlen(strStart))
         {
         NODE *pNode = CreateNode(strStart);
-        //assert (pNode);
 
-        if (InsertNode(pNode, pHEAD))
-            dict.size++;
+        // INSERT node at HEAD position
+        pNode->next = pHEAD->pNode;     // new->next to current head
+        pHEAD->pNode = pNode;           // then HEAD is the new guy
+        dict.size++;
         }
 } while(pMem < endMem);   // while < endBuf
 
@@ -353,7 +236,6 @@ unsigned int size(void)
     for(int x = 0; x< HASHSIZE; x++)
         size += HASH[x].cnt;
     printf ("size() 1:%d, 2:%d\n", size, dict.size);
-    DJM
     */
 return dict.size;
 }
@@ -362,7 +244,7 @@ return dict.size;
 static int FreeNode(NODE *p)
 {
     assert(p);
-    
+
     if(p->next)
         {
         if (p->next->next)
@@ -374,8 +256,8 @@ static int FreeNode(NODE *p)
             free(p->next);
             p->next = NULL;
             }
-        }    
-        
+        }
+
     else if(NULL != p)
         {
             free(p);    // if list only has 1 element
@@ -384,7 +266,7 @@ static int FreeNode(NODE *p)
     return 0;
 }
 */
-    
+
 /*****
  * *                    unload()
  * * */
@@ -400,7 +282,7 @@ NODE *p, *tmp;
         HEAD *pH = &HASH[x];
 
         p = pH->pNode;
-        
+
         while (NULL != p)
             {
                 tmp = p;
