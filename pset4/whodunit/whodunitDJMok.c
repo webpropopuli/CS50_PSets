@@ -1,17 +1,24 @@
-##include <cs50.h>
+// Copies a BMP file
+
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "bmp.h"
 
 int main(int argc, char *argv[])
 {
+    // ensure proper usage
     if (argc != 3)
     {
+        fprintf(stderr, "Usage: copy infile outfile\n");
         return 1;
     }
 
+    // remember filenames
     char *infile = argv[1];
     char *outfile = argv[2];
 
+    // open input file
     FILE *inptr = fopen(infile, "r");
     if (inptr == NULL)
     {
@@ -19,6 +26,7 @@ int main(int argc, char *argv[])
         return 2;
     }
 
+    // open output file
     FILE *outptr = fopen(outfile, "w");
     if (outptr == NULL)
     {
@@ -27,12 +35,15 @@ int main(int argc, char *argv[])
         return 3;
     }
 
+    // read infile's BITMAPFILEHEADER
     BITMAPFILEHEADER bf;
     fread(&bf, sizeof(BITMAPFILEHEADER), 1, inptr);
 
+    // read infile's BITMAPINFOHEADER
     BITMAPINFOHEADER bi;
     fread(&bi, sizeof(BITMAPINFOHEADER), 1, inptr);
 
+    // ensure infile is (likely) a 24-bit uncompressed BMP 4.0
     if (bf.bfType != 0x4d42 || bf.bfOffBits != 54 || bi.biSize != 40 ||
         bi.biBitCount != 24 || bi.biCompression != 0)
     {
@@ -42,49 +53,38 @@ int main(int argc, char *argv[])
         return 4;
     }
 
+    // write outfile's BITMAPFILEHEADER
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
 
-    //bi.biHeight *= reps;
-    //bi.biWidth *= reps;
+    // write outfile's BITMAPINFOHEADER
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
+    // determine padding for scanlines
     int padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
-    // looping through lines
+    // iterate over infile's scanlines
     for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
     {
-        // looping through pixels in a line
-        for (int j = 0, biWidth = bi.biWidth; j < biWidth; j++)
+        // iterate over pixels in scanline
+        for (int j = 0; j < bi.biWidth; j++)
         {
             // temporary storage
             RGBTRIPLE triple;
 
-            // read RGB triple
+            // read RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-            // turn white pixels black
-            if (triple.rgbtRed == 0xff && triple.rgbtBlue == 0xff && triple.rgbtGreen == 0xff)
-            {
-                triple.rgbtRed = 0x00;
-                triple.rgbtGreen = 0x00;
-                triple.rgbtBlue = 0x00;
-            }
-            // turn other pixels white
-            else
-            {
-                triple.rgbtRed = 0xff;
-                triple.rgbtBlue = 0xff;
-                triple.rgbtGreen = 0xff;
-            }
+            //remove blue and green. It's always Proessor Plum, isn't it?
+            triple.rgbtBlue = triple.rgbtGreen = 0;
 
-            // write rgb triple to output
+            // write RGB triple to outfile
             fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
         }
 
-        // skip padding
+        // skip over padding, if any
         fseek(inptr, padding, SEEK_CUR);
 
-        // add padding
+        // then add it back (to demonstrate how)
         for (int k = 0; k < padding; k++)
         {
             fputc(0x00, outptr);
@@ -97,5 +97,6 @@ int main(int argc, char *argv[])
     // close outfile
     fclose(outptr);
 
+    // success
     return 0;
 }

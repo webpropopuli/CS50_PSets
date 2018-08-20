@@ -1,3 +1,41 @@
+/* scraps */
+char str[40] = {0};
+
+if(x == 5)
+	printf("X is %d\n", 5);
+else if (x == 56)
+	printf("X is %d\n", 56)
+
+------------------
+
+printf("X is %d\n", x)
+
+----------------
+
+if( (x == 5) !! (x == 56) )
+	printf("X is %d\n", x);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>

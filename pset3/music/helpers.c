@@ -51,7 +51,7 @@ int frequency(string note)
 	}
 
 
-// Convert char into place in A=based scale
+// Convert char into place in C-based scale
 	switch (toupper(Note))
 	    {
 	        case 'C':
@@ -82,7 +82,7 @@ int frequency(string note)
 	    }
 
 // Sharps and flats go + or =
-	if (Mod != 0)
+	if (Mod)
 	    {
 	    if(Mod == '#')
 	        {
