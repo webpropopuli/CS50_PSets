@@ -39,23 +39,57 @@ db = SQL("sqlite:///finance.db")
 @app.route("/")
 @login_required
 def index():
-    """Show portfolio of stocks"""
 
-    """
-    Load user DB
-    Get all owned stocks
-    Convert to display somehow
-    Show them
-    """
-    render_template("index.html")
-    return
+    return apology("INDEX: in progress")
+"""
+    # Get owned stocks
+    portfolio = db.execute("SELECT shares, symbol \
+                                    FROM portfolio WHERE id = :id", \
+                                    id=session["user_id"])
+
+    if not portfolio:
+        return apology("INDEX: SELECT failed")
+
+    # create a temporary variable to store TOTAL worth ( cash + share)
+    total_cash = 0
+
+    # update each symbol prices and total
+    for portfolio_symbol in portfolio_symbols:
+        symbol = portfolio_symbol["symbol"]
+        shares = portfolio_symbol["shares"]
+        stock = lookup(symbol)
+        total = shares * stock["price"]
+        total_cash += total
+        db.execute("UPDATE portfolio SET price=:price, \
+                    total=:total WHERE id=:id AND symbol=:symbol", \
+                    price=usd(stock["price"]), \
+                    total=usd(total), id=session["user_id"], symbol=symbol)
+
+    # update user's cash in portfolio
+    updated_cash = db.execute("SELECT cash FROM users \
+                               WHERE id=:id", id=session["user_id"])
+
+    # update total cash -> cash + shares worth
+    total_cash += updated_cash[0]["cash"]
+
+    # print portfolio in index homepage
+    updated_portfolio = db.execute("SELECT * from portfolio \
+                                    WHERE id=:id", id=session["user_id"])
+
+    return render_template("index.html", stocks=updated_portfolio, \
+                            cash=usd(updated_cash[0]["cash"]), total= usd(total_cash) )
+"""
+
 
 #################################################
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+    if request.method == "GET":
+        return render_template("buy.html")
+    else:
+        return apology("TODO")
 
 #################################################
 @app.route("/history")
@@ -94,10 +128,10 @@ def login():
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
             return apology("invalid username and/or password", 403)
 
-        # Remember which user has logged in
+        # Save logged in
         session["user_id"] = rows[0]["id"]
 
-        # Redirect user to home page
+        # Send back to home with auth after logging in
         return redirect("/")
 
 
@@ -117,6 +151,38 @@ def logout():
 def register():
     """Register user"""
 
+    if request.method == "POST":
+
+        # ensure username was submitted
+        if not request.form.get("username"):
+            return apology("Must provide username")
+
+        # ensure password was submitted
+        elif not request.form.get("password"):
+            return apology("Must provide password")
+
+        # ensure password and verified password is the same
+        elif request.form.get("password") != request.form.get("passwordchk"):
+            return apology("password doesn't match")
+
+        # insert the new user into users, storing the hash of the user's password
+        res = db.execute("INSERT INTO users (username, hash) \
+                             VALUES(:username, :hash)", \
+                             username=request.form.get("username"), \
+                             hash=generate_password_hash(request.form.get("password")))
+
+        if not res:
+            return apology("INSERT failed. User may already exist?", 401)
+
+        # remember which user has logged in
+        session["user_id"] = res
+
+        # redirect user to home page
+        return redirect("/")
+
+    else:
+        return render_template("register.html")
+"""
     # Forget any user_id
     session.clear()
 
@@ -146,7 +212,7 @@ def register():
         # Write to DB with hashed pwd
         rows = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)",\
         username=request.form.get("username"),\
-        hash=generate_password_hash(request.form.get("password"), method='plain'))
+        hash=generate_password_hash(request.form.get("password")))
 
         if not rows:
             return apology("INSERT failed. User may already exist?", 401)
@@ -154,11 +220,11 @@ def register():
         # Remember which user has logged in
         user_id = db.execute("SELECT id FROM users WHERE username IS :username",\
                             username=request.form.get("username"))
-        session['user_id'] = user_id[0]['id']
+        session["user_id"] = rows
 
         # Redirect user to home page
-        return redirect(url_for("index"))
-
+        return redirect("/")
+"""
 
 #################################################
 @app.route("/quote", methods=["GET", "POST"])
@@ -185,12 +251,3 @@ def sell():
     """Sell shares of stock"""
     return apology("TODO")
 
-#################################################
-def errorhandler(e):
-    """Handle error"""
-    return apology(e.name, e.code)
-
-
-# listen for errors
-for code in default_exceptions:
-    app.errorhandler(code)(errorhandler)

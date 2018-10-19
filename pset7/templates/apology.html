@@ -1,2 +1,5 @@
 {% extends "layout.html" %} {% block title %} Apology {% endblock %} {% block main %}
-<img alt="{{ top }}" class="border" src="http://memegen.link/custom/{{ top | urlencode }}/{{ bottom | urlencode }}.jpg" /> {% endblock %}
+<h3> error {{ top }}</h3>
+<div><img src="/error-bang.png" alt="Cool error img goes here" />
+</div>
+< {{ bottom }} {% endblock %}
