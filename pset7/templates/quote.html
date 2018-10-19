@@ -1,0 +1,12 @@
+{% extends "layout.html" %} {% block title %} Log In {% endblock %} {% block main %} {% if stock %}
+<p>
+	{{ stock.name }} ({{ stock.symbol }}) is curently {{ stock.price }}
+</p>
+{% else %}
+<form action="/quote" method="post">
+	<div class="form-group">
+		<input autocomplete="off" autofocus class="form-control" name="sym" placeholder="<stock symbol>" type="text" />
+	</div>
+	<button class="btn btn-primary" type="submit">Get Curent price</button>
+</form>
+{% endif %} {% endblock %}
